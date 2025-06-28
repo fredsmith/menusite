@@ -16,14 +16,14 @@ A macOS menu bar app that displays websites in mobile view. Perfect for monitori
 ## Installation
 
 ### Option 1: Download Pre-built App
-1. Go to [Releases](https://github.com/yourusername/menusite/releases)
+1. Go to [Releases](https://github.com/fredsmith/menusite/releases)
 2. Download the latest `menusite-macos.zip`
 3. Unzip and drag `menusite.app` to Applications folder
 4. **Important**: Right-click → "Open" on first launch (unsigned app security requirement)
 
 ### Option 2: Build from Source
 ```bash
-git clone https://github.com/yourusername/menusite.git
+git clone https://github.com/fredsmith/menusite.git
 cd menusite
 open menusite.xcodeproj
 # Build and run in Xcode (⌘+R)
@@ -77,7 +77,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## Support
 
-If you encounter issues or have feature requests, please [open an issue](https://github.com/yourusername/menusite/issues).
+If you encounter issues or have feature requests, please [open an issue](https://github.com/fredsmith/menusite/issues).
 
 ---
 
