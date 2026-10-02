@@ -20,49 +20,21 @@ jobs:
       with:
         xcode-version: latest-stable
         
-    - name: Create ExportOptions.plist
+    - name: Build app
       run: |
-        cat > ExportOptions.plist << EOF
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>method</key>
-            <string>mac-application</string>
-            <key>signingStyle</key>
-            <string>automatic</string>
-            <key>stripSwiftSymbols</key>
-            <true/>
-        </dict>
-        </plist>
-        EOF
-        
-    - name: Build and export app
-      run: |
-        # Build the app
         xcodebuild -project menusite.xcodeproj \
           -scheme menusite \
           -configuration Release \
           -derivedDataPath build \
-          -archivePath build/menusite.xcarchive \
-          archive
-          
-        # Export the app
-        xcodebuild -exportArchive \
-          -archivePath build/menusite.xcarchive \
-          -exportPath build/export \
-          -exportOptionsPlist ExportOptions.plist
+          CODE_SIGN_STYLE=Manual \
+          CODE_SIGN_IDENTITY=- \
+          DEVELOPMENT_TEAM= \
+          build
         
     - name: Create app bundle
       run: |
-        # Find the exported app
-        APP_PATH=$(find build/export -name "*.app" -type d | head -1)
-        echo "Found app at: $APP_PATH"
-        
-        # Create zip file
-        cd build/export
-        zip -r ../../menusite-macos.zip *.app
-        cd ../..
+        cd build/Build/Products/Release
+        ditto -c -k --keepParent menusite.app ../../../../menusite-macos.zip
         
     - name: Upload build artifact
       uses: actions/upload-artifact@v4

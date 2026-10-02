@@ -103,6 +103,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.title = "🌐"
             button.target = instance
             button.action = #selector(WebViewerInstance.togglePopover(_:))
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
             button.toolTip = "Website Viewer - \(instance.targetURL)"
             
             // Create right-click menu with more options
@@ -131,7 +132,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             
-            button.menu = menu
+            instance.contextMenu = menu
             
             print("✅ Button configured for \(id)")
         } else {
@@ -227,6 +228,7 @@ protocol WebViewerInstanceDelegate: AnyObject {
 class WebViewerInstance: NSObject {
     let id: String
     var statusBarItem: NSStatusItem?
+    var contextMenu: NSMenu?
     var popover: NSPopover!
     var webViewController: WebViewController!
     weak var delegate: WebViewerInstanceDelegate?
@@ -297,6 +299,11 @@ class WebViewerInstance: NSObject {
     }
     
     @objc func togglePopover(_ sender: AnyObject?) {
+        if let event = NSApp.currentEvent,
+           event.type == .rightMouseUp || event.modifierFlags.contains(.control) {
+            showContextMenu()
+            return
+        }
         print("👆 Toggle popover for \(id)")
         if let button = statusBarItem?.button {
             if popover.isShown {
@@ -305,6 +312,18 @@ class WebViewerInstance: NSObject {
                 popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
             }
         }
+    }
+    
+    func showContextMenu() {
+        guard let statusBarItem = statusBarItem,
+              let button = statusBarItem.button,
+              let menu = contextMenu else { return }
+        if popover.isShown {
+            popover.performClose(nil)
+        }
+        statusBarItem.menu = menu
+        button.performClick(nil)
+        statusBarItem.menu = nil
     }
     
     @objc func showSettings() {
@@ -325,8 +344,7 @@ class WebViewerInstance: NSObject {
         print("🔗 External links toggled to: \(openLinksExternally)")
         
         // Update the menu item state
-        if let button = statusBarItem?.button,
-           let menu = button.menu {
+        if let menu = contextMenu {
             for item in menu.items {
                 if item.action == #selector(toggleExternalLinks) {
                     item.state = openLinksExternally ? .on : .off
@@ -343,8 +361,7 @@ class WebViewerInstance: NSObject {
     
     func updateMenuStates() {
         // Update menu item states to reflect current settings
-        if let button = statusBarItem?.button,
-           let menu = button.menu {
+        if let menu = contextMenu {
             for item in menu.items {
                 if item.action == #selector(toggleExternalLinks) {
                     item.state = openLinksExternally ? .on : .off
